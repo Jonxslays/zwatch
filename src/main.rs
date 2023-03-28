@@ -2,7 +2,7 @@ use clap::Parser as ClapParser;
 use notify::RecursiveMode;
 use notify_debouncer_mini::{new_debouncer, DebouncedEvent, DebouncedEventKind};
 use std::{
-    path::{Path, PathBuf, MAIN_SEPARATOR_STR},
+    path::{Path, PathBuf, MAIN_SEPARATOR},
     process::Command,
     time::Duration,
 };
@@ -75,7 +75,7 @@ fn rebuild_file(path: &mut PathBuf) {
     Command::new("zig")
         .arg("build")
         .arg("--build-file")
-        .arg(&format!("{}{}build.zig", p!(path), MAIN_SEPARATOR_STR))
+        .arg(&format!("{}{}build.zig", p!(path), MAIN_SEPARATOR))
         .arg(exercise.to_string())
         .spawn() // :) have a great day!
         .unwrap_or_else(|err| {
@@ -109,7 +109,6 @@ fn prepare_path(path: &Path) -> PathBuf {
     });
 
     path.extend(["exercises"]);
-
 
     if !path.exists() {
         path.pop();
