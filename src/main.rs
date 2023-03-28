@@ -42,13 +42,8 @@ fn handle_file_events(events: Vec<DebouncedEvent>) {
     let mut paths = Vec::new();
 
     for event in events {
-        match event.kind {
-            DebouncedEventKind::Any => {
-                if should_rebuild(&event.path, &paths) {
-                    paths.push(event.path)
-                }
-            }
-            _ => {}
+        if event.kind == DebouncedEventKind::Any && should_rebuild(&event.path, &paths) {
+            paths.push(event.path);
         }
     }
 
@@ -57,11 +52,11 @@ fn handle_file_events(events: Vec<DebouncedEvent>) {
     }
 }
 
-fn should_rebuild(path: &PathBuf, paths: &Vec<PathBuf>) -> bool {
+fn should_rebuild(path: &PathBuf, paths: &[PathBuf]) -> bool {
     if let Some(ext) = path.extension() {
         // Only zig files that exist and haven't already
         // changed this debounce cycle
-        ext.eq("zig") && !paths.contains(&path) && path.exists()
+        ext.eq("zig") && !paths.contains(path) && path.exists()
     } else {
         false
     }
@@ -80,7 +75,7 @@ fn rebuild_file(path: &mut PathBuf) {
     let number = target.split('_').collect::<Vec<&str>>()[0];
     // We parse to uint to make sure the first element of the array are numbers
     let exercise = number.parse::<usize>().unwrap_or_else(|err| {
-        eprintln!("Failed to convert exercise number: {}", err.to_string());
+        eprintln!("Failed to convert exercise number: {err}");
         std::process::exit(1);
     });
 
@@ -94,31 +89,31 @@ fn rebuild_file(path: &mut PathBuf) {
         .arg(exercise.to_string())
         .spawn() // :) have a great day!
         .unwrap_or_else(|err| {
-            eprintln!("Do you have zig installed? - {}", err.to_string());
+            eprintln!("Do you have zig installed? - {err}");
             std::process::exit(1);
         });
 }
 
-fn handle_err_events(errs: Vec<notify::Error>) {
+fn handle_err_events(errs: &[notify::Error]) {
     let message = errs
         .iter()
-        .map(|e| e.to_string())
+        .map(std::string::ToString::to_string)
         .collect::<Vec<String>>()
         .join("\n");
 
-    eprintln!("{}", message);
+    eprintln!("{message}");
 }
 
 fn handle_message(message: Result<Vec<DebouncedEvent>, Vec<notify::Error>>) {
     match message {
         Ok(events) => handle_file_events(events),
-        Err(errs) => handle_err_events(errs),
+        Err(errs) => handle_err_events(&errs),
     }
 }
 
 fn prepare_path(path: &Path) -> PathBuf {
     let mut path = path.canonicalize().unwrap_or_else(|err| {
-        println!("{}", err.to_string());
+        println!("{err}");
         println!("Targeting: {}", p!(path));
         std::process::exit(1);
     });
