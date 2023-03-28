@@ -9,7 +9,7 @@ I was learning [Zig](https://ziglang.org/), and using the
 
 Although, at the time of publishing this repo there is no file watch/hot reload
 functionality built into ziglings. Due to that I created this binary crate for
-use with `ziglings` to enable hot reloading on the exercises.
+use with ziglings to enable hot reloading on the exercises.
 
 ## Installation
 
