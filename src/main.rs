@@ -14,6 +14,23 @@ macro_rules! p {
     };
 }
 
+fn main() -> notify::Result<()> {
+    let parser = Parser::parse();
+    let (tx, rx) = std::sync::mpsc::channel();
+    let path = prepare_path(Path::new(&parser.path));
+    let mut debouncer = new_debouncer(Duration::from_secs(2), None, tx)?;
+
+    #[rustfmt::skip]
+    debouncer.watcher().watch(path.as_path(), RecursiveMode::NonRecursive)?;
+    println!("Watching for file changes in {}", p!(path));
+
+    for message in rx {
+        handle_message(message);
+    }
+
+    Ok(())
+}
+
 #[derive(ClapParser, Debug)]
 #[command(author, version, about = "Zwatch - A ziglings hot reloader")]
 struct Parser {
@@ -115,21 +132,4 @@ fn prepare_path(path: &Path) -> PathBuf {
     }
 
     path
-}
-
-fn main() -> notify::Result<()> {
-    let parser = Parser::parse();
-    let (tx, rx) = std::sync::mpsc::channel();
-    let path = prepare_path(Path::new(&parser.path));
-    let mut debouncer = new_debouncer(Duration::from_secs(2), None, tx)?;
-
-    #[rustfmt::skip]
-    debouncer.watcher().watch(path.as_path(), RecursiveMode::NonRecursive)?;
-    println!("Watching for file changes in {}", p!(path));
-
-    for message in rx {
-        handle_message(message);
-    }
-
-    Ok(())
 }
