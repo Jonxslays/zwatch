@@ -15,11 +15,7 @@ macro_rules! p {
 }
 
 #[derive(ClapParser, Debug)]
-#[command(
-    author = "Jonxslays",
-    version = "0.1.0",
-    about = "Zwatch - A ziglings hot reloader."
-)]
+#[command(author, version, about = "Zwatch - A ziglings hot reloader")]
 struct Parser {
     /// The path to your ziglings directory
     path: String,
@@ -63,7 +59,9 @@ fn rebuild_file(path: &mut PathBuf) {
         })
         .to_string_lossy();
 
+    // FIle format is 001_hello.zig: number = ["001", "hello.zig"] -> "001"
     let number = target.split('_').collect::<Vec<&str>>()[0];
+    // We parse to uint to make sure the first element of the array are numbers
     let exercise = number.parse::<usize>().unwrap_or_else(|err| {
         eprintln!("Failed to convert exercise number: {}", err.to_string());
         std::process::exit(1);
