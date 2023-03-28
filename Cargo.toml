@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "A ziglings hot reloader."
 authors = ["Jonxslays"]
+readme = "README.md"
 
 [dependencies]
 clap = { version = "4.1.13", features = ["derive"] }
